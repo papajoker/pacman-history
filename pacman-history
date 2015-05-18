@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+#historique dans pacman
+#grep "\[ALPM\]" /var/log/pacman.log | grep -i "kate"
+
+declare -r pkgname='pacman-history'
+
+## default string constants {{{
+declare -A txt=(
+    ['file']='file'
+    ['package']='package name'
+    ['equiv']='as'
+    ['packagefile']='file in package'
+    ['error']='Error'
+    ['param']='Invalid search parameter'
+    ['upgraded']='Update'
+    ['installed']='Install'    
+)
+lang=${LANG:0:2}
+dico="/usr/share/locale/$lang/LC_MESSAGES/$pkgname"
+if [ -f "$dico" ]; then
+    . "$dico";
+fi
+# }}}
+
+function usage(){
+	echo "$pkgname [-o] ${txt[file]}"
+	echo -e "\t${txt[file]} : ${txt['package']}"	
+	echo -e "\t-o ${txt[file]} : ${txt['packagefile']}"
+	echo -e "${txt[equiv]}: grep \"\[ALPM\]\" /var/log/pacman.log | grep -i \"pacman\""
+}
+
+function get_paquet(){
+	local fichier=$1
+	local ret=$(pacman -Qoq $fichier 2>/dev/null)
+	if [[ "$?" -ne 0 ]]; then
+		echo ""
+	else
+		echo "$ret"
+	fi
+}
+
+function run(){
+	local paquage="$1"
+	#echo "-- grep \"\[ALPM\]\" /var/log/pacman.log | grep -i \"$paquage\""
+ 	ret=$(grep "\[ALPM\]" /var/log/pacman.log | grep -i " $paquage ")
+ 	ret=${ret//\[ALPM\]/}
+ 	[ "${txt['upgraded']}" != '' ] && ret=${ret//upgraded /${txt['upgraded']} }
+ 	[ "${txt['installed']}" != '' ] && ret=${ret//installed /${txt['installed']} }
+ 	echo -e "$ret"
+	#echo -e ${ret//\[/\/n\[}
+}
+
+if [ "$1" == '-h' ] || [ "$1" == '--help' ]; then
+	usage
+	exit 0
+fi
+
+if [ "$1" == '-o' ]; then
+	paquage=$(get_paquet "$2")
+	echo -ne "-- \033[0m\033[1;37m$paquage\033[0m -- \033[0m\033[1;37m" 
+	#ret=$(pacman -Qi "$paquage" | grep Description | awk -F':' '{print $2}') # version fr uniquement
+	ret=$(pacman -Qi "$paquage" | head -n 3 | tail -n -1 | awk -F':' '{print $2}')
+	echo -e "$ret\033[0m"
+else
+	paquage="$1"
+fi
+
+if [ "$paquage" == '' ]; then
+	echo "${txt['error']} : ${txt['param']}" >&2
+	usage
+	exit 127
+fi
+
+run $paquage
+
+exit 0
