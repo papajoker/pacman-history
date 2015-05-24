@@ -5,6 +5,7 @@ declare -A txt=(
     ['packagefile']='fichier contenu dans un paquet'
     ['error']='Erreur'
     ['param']='Paramètre de recherche invalide'
+    ['cache']='paquet dans le cache'  
     ['upgraded']='maj de'
     ['installed']='Installation de'
 )

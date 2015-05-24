@@ -12,6 +12,7 @@ declare -A txt=(
     ['packagefile']='file in package'
     ['error']='Error'
     ['param']='Invalid search parameter'
+    ['cache']='package in cache'  
     ['upgraded']='Update'
     ['installed']='Install'    
 )
@@ -39,6 +40,15 @@ function get_paquet(){
 	fi
 }
 
+function read_cache(){
+	local paquage="$1"
+	pkgs=( /var/cache/pacman/pkg/$paquage-[0-9]*.pkg.tar.xz )
+	[ "${#pkgs[@]}" -gt "0" ] && echo -e "\n--${txt[cache]}:"
+	for pkg in ${pkgs[@]}; do
+		echo "$pkg"
+	done
+}
+
 function run(){
 	local paquage="$1"
 	#echo "-- grep \"\[ALPM\]\" /var/log/pacman.log | grep -i \"$paquage\""
@@ -47,6 +57,7 @@ function run(){
  	[ "${txt['upgraded']}" != '' ] && ret=${ret//upgraded /${txt['upgraded']} }
  	[ "${txt['installed']}" != '' ] && ret=${ret//installed /${txt['installed']} }
  	echo -e "$ret"
+ 	read_cache $paquage
 	#echo -e ${ret//\[/\/n\[}
 }
 

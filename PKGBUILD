@@ -1,6 +1,6 @@
 # Maintainer: Papajoker <papajoker [at] archlinux [dot] info>
 pkgname=pacman-history
-pkgver=0.1.0
+pkgver=0.2.0
 pkgrel=1
 pkgdesc="get pacman history for one file"
 arch=('any')
