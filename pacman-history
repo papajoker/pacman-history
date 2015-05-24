@@ -43,7 +43,7 @@ function get_paquet(){
 function read_cache(){
 	local paquage="$1"
 	pkgs=( /var/cache/pacman/pkg/$paquage-[0-9]*.pkg.tar.xz )
-	[ "${#pkgs[@]}" -gt "0" ] && echo -e "\n--${txt[cache]}:"
+	[ "${#pkgs[@]}" -gt "0" ] && echo -e "\n-- ${txt[cache]}:"
 	for pkg in ${pkgs[@]}; do
 		echo "$pkg"
 	done

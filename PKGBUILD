@@ -17,7 +17,7 @@ options=()
 install=
 source=("$pkgname::git+http://github.com/papajoker/pacman-history#branch=master")
 noextract=()
-md5sums=('SKIP') #generate with 'makepkg -g'
+md5sums=('SKIP')
 
 build() {
   cd "$srcdir"
