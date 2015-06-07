@@ -12,8 +12,9 @@ declare -A txt=(
     ['packagefile']='file in package'
     ['error']='Error'
     ['param']='Invalid search parameter'
-    ['cache']='package in cache'  
+    ['cache']='package%s in cache'  
     ['upgraded']='Update'
+    ['downgraded']='downgraded'
     ['installed']='Install'    
 )
 lang=${LANG:0:2}
@@ -27,7 +28,8 @@ function usage(){
 	echo "$pkgname [-o] ${txt[file]}"
 	echo -e "\t${txt[file]} : ${txt['package']}"	
 	echo -e "\t-o ${txt[file]} : ${txt['packagefile']}"
-	echo -e "${txt[equiv]}: grep \"\[ALPM\]\" /var/log/pacman.log | grep -i \"pacman\""
+	echo -e "  -- ${txt[equiv]}: grep \"\[ALPM\]\" /var/log/pacman.log | grep -i \"pacman\""
+	echo -e "  -- ${txt['downgraded']}: pacman -U [/var/cache/pacman/pkg/ ${txt['package']}.xz ]"
 }
 
 function get_paquet(){
@@ -43,10 +45,16 @@ function get_paquet(){
 function read_cache(){
 	local paquage="$1"
 	pkgs=( $(ls /var/cache/pacman/pkg/$paquage-[0-9]*.pkg.tar.xz 2>/dev/null) )
-	[ "${#pkgs[@]}" -gt "0" ] && echo -e "\n-- ${txt[cache]}:"
+	if [ "${#pkgs[@]}" -gt "0" ]; then
+		local plural=''
+		[ "${#pkgs[@]}" -gt "1" ] && plural='s'
+		local label=$(printf "${txt[cache]}" "$plural")
+		echo -e "\n-- ${label}:"
+	fi
 	for pkg in ${pkgs[@]}; do
 		echo "$pkg"
 	done
+	#echo "-- ${txt['downgraded']}: pacman -U [/var/cache/pacman/pkg/ ${txt['package']}.xz ]"
 }
 
 function run(){
@@ -54,8 +62,9 @@ function run(){
 	#echo "-- grep \"\[ALPM\]\" /var/log/pacman.log | grep -i \"$paquage\""
  	ret=$(grep "\[ALPM\]" /var/log/pacman.log | grep -i " $paquage ")
  	ret=${ret//\[ALPM\]/}
- 	[ "${txt['upgraded']}" != '' ] && ret=${ret//upgraded /${txt['upgraded']} }
- 	[ "${txt['installed']}" != '' ] && ret=${ret//installed /${txt['installed']} }
+ 	[ "${txt['upgraded']}" != '' ] && ret=${ret//upgraded $paquage/${txt['upgraded']} $paquage }
+ 	[ "${txt['installed']}" != '' ] && ret=${ret//installed $paquage/${txt['installed']} $paquage }
+ 	[ "${txt['downgraded']}" != '' ] && ret=${ret//downgraded $paquage/${txt['downgraded']} $paquage}
  	echo -e "$ret"
  	read_cache $paquage
 	#echo -e ${ret//\[/\/n\[}
