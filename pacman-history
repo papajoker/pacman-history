@@ -17,8 +17,9 @@ declare -A txt=(
     ['downgraded']='downgraded'
     ['installed']='Install'    
 )
-lang=${LANG:0:2}
-dico="/usr/share/locale/$lang/LC_MESSAGES/$pkgname"
+lg=$(locale 2>/dev/null | grep "^LANG" | awk -F'=' '{print $2}')
+lg=${lg:0:2}
+dico="/usr/share/locale/$lg/LC_MESSAGES/$pkgname"
 if [ -f "$dico" ]; then
     . "$dico";
 fi
